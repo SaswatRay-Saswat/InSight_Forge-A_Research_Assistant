@@ -395,13 +395,13 @@ InSight Forge has **no database**. All data is transient or file-based.
 ### 7.1 UI Layout Design
 
 ```
-┌────────────────────────────────────────────────────────────────┐
-│  SIDEBAR (Collapsible)           │  MAIN CONTENT AREA          │
+┌─────────────────────────────────────────────────────────────────┐
+│  SIDEBAR (Collapsible)           │  MAIN CONTENT AREA           │
 │  ┌────────────────────────────┐  │                              │
-│  │ ⚙️ Configuration           │  │  ┌─[col1]─┬─[col2]─┬─[col3]┐│
-│  │ ┌────────────────────────┐ │  │  │        │InSight │       ││
-│  │ │ 🤖 Model Selection     │ │  │  │        │ Forge  │       ││
-│  │ │  ○ OpenAI ○ GROQ       │ │  │  └────────┴────────┴───────┘│
+│  │ ⚙️ Configuration           │  │  ┌─[col1]─┬─[col2]─┬─[col3]┐ │
+│  │ ┌────────────────────────┐ │  │  │        │InSight │       │ │
+│  │ │ 🤖 Model Selection     │ │  │  │        │ Forge  │       │ │
+│  │ │  ○ OpenAI ○ GROQ       │ │  │  └────────┴────────┴───────┘ │
 │  │ │  ○ Ollama              │ │  │                              │
 │  │ │  [Model Dropdown ▼]    │ │  │  ┌──────────────────────────┐│
 │  │ └────────────────────────┘ │  │  │ What would you like to   ││
