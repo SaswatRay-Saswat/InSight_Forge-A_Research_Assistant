@@ -1,9 +1,6 @@
 # InSight_Forge-A_Research_Assistant
-AI-based Research Assistant.
-It is AI-based Research Assistant that helps with research by analysing various research papers and providing insights on them.
 
-
-An AI-powered research assistant that automates **information gathering, document analysis, and report generation** using Large Language Models (LLMs) and intelligent tools.
+An AI-powered research assistant that automates **information gathering, document analysis, and report generation** using Large Language Models (LLMs) like Groq, OpenAI, Ollama and intelligent tools.
 
 ---
 
@@ -30,6 +27,18 @@ The system uses a **single intelligent agent with multiple tools** to generate s
 
 ---
 
+## 🌟 Highlights
+
+-  Intelligent tool-based agent using CrewAI  
+-  Combines real-time web research with document analysis  
+-  Supports both online data and PDF-based inputs  
+-  Dynamic tool selection based on user query  
+-  Structured & readable report generation as a markdown file  
+-  Secure API key handling   
+-  Clean and interactive Streamlit interface  
+
+---
+
 ## 🏗️ System Architecture
 
 ```
@@ -52,17 +61,55 @@ Generated Research Report (.md)
 
 ---
 
-## 🧠 How It Works
+## 🧠 Usage & System Workflow
 
-1. User enters a research topic
-2. (Optional) Uploads PDF documents
+1. User enters a research query. PDF documents can be uploaded, if needed.
+2. User, then, selects a LLM provider.
 3. The agent decides which tool to use:
-
    * Web search (EXA API)
    * PDF analysis
-4. Data is processed using an LLM
-5. A structured research report is generated
-6. Output is displayed and saved as a Markdown file
+4. Data is processed
+5. A structured research report is generated and displayed and also saved as a Markdown file
+
+---
+
+## 📚 Code Explanation
+
+### Main Application (`app.py`)
+- Handles Streamlit UI rendering  
+- Takes user input (topic + PDFs)  
+- Triggers the research workflow  
+- Displays generated output  
+
+---
+
+### Research Module (`researcher.py`)
+- Core logic of the system  
+- Initializes LLM (OpenAI / Groq / Ollama)  
+- Creates a single AI agent  
+- Assigns tools (EXA + PDF analysis)  
+- Defines and executes research tasks  
+
+---
+
+### Sidebar Module (`sidebar.py`)
+- Handles model selection  
+- Manages API key input  
+- Provides configuration settings  
+
+---
+
+### Output Handler (`output_handler.py`)
+- Formats generated content  
+- Saves output as Markdown (`.md`)  
+- Handles display of results  
+
+---
+
+### Key Design Insight
+- Uses **single agent + multiple tools**
+- NOT a multi-agent system  
+- Tools are selected dynamically based on task  
 
 ---
 
@@ -97,6 +144,17 @@ InSight_Forge/
 | LLM Providers | OpenAI / Groq / Ollama |
 | APIs          | EXA Search API         |
 | Tools         | PDF Processing         |
+
+---
+
+## 📋 Prerequisites
+
+- Python **3.10 or higher**
+- pip (Python package manager)
+- API Keys:
+  - OpenAI or Groq
+  - Exa API
+  - Ollama (Optional; for local LLM support)
 
 ---
 
@@ -196,6 +254,6 @@ Feel free to fork the repository and submit pull requests.
 
 * CrewAI framework
 * OpenAI / Groq / Ollama
-* EXA API
+* Exa API
 
 ---
