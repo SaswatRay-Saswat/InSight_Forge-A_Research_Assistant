@@ -100,25 +100,22 @@ InSight_Forge/
 
 ---
 
-## 🔧 Installation
+## 🔧 Installation & Setup
 
-### 1. Clone the Repository
-
+### 1️⃣ Clone Repository
 ```bash
 git clone https://github.com/SaswatRay-Saswat/InSight_Forge-A_Research_Assistant.git
 cd InSight_Forge-A_Research_Assistant
 ```
 
-### 2. Create Virtual Environment
-
+### 2️⃣ Create Virtual Environment
 ```bash
-python -m venv venv
-source venv/bin/activate   # (Linux/Mac)
-venv\Scripts\activate      # (Windows)
+python -m venv .venv
+source .venv/bin/activate   # Linux/Mac
+.venv\Scripts\activate      # Windows
 ```
 
-### 3. Install Dependencies
-
+### 3️⃣ Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
@@ -192,19 +189,6 @@ The system generates:
 
 Contributions are welcome!
 Feel free to fork the repository and submit pull requests.
-
----
-
-## 📜 License
-
-This project is for academic and educational purposes.
-
----
-
-## 👨‍💻 Author
-
-**Saswat Ray**
-B.Tech Major Project
 
 ---
 
