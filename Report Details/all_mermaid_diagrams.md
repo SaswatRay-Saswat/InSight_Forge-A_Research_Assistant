@@ -110,7 +110,7 @@ graph TB
 
     U -->|"Query, PDFs,<br/>Config, API Keys"| P1
 
-    subgraph P1["P1: User Interface Processing<br/>(app.py + sidebar.py)"]
+    subgraph P1["P1: User Interface Processing (app.py + sidebar.py)"]
         direction LR
         P1a["Validate Config"]
         P1b["Save PDFs to Temp"]
@@ -118,7 +118,7 @@ graph TB
 
     P1 -->|"Selection dict +<br/>Full Task Description"| P2
 
-    subgraph P2["P2: Research Agent Processing<br/>(researcher.py)"]
+    subgraph P2["P2: Research Agent Processing (researcher.py)"]
         direction LR
         P2a["Create Agent"]
         P2b["Create Task"]
