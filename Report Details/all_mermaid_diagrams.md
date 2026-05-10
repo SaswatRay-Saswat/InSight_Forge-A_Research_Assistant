@@ -39,13 +39,13 @@ graph LR
 
 ```mermaid
 graph TB
-    subgraph PL["PRESENTATION LAYER<br/>(Streamlit Web Application)"]
+    subgraph PL["PRESENTATION LAYER (Streamlit Web Application)"]
         SB["Sidebar<br/>(sidebar.py)<br/>Provider, Model, API Keys"]
         RI["Research Input<br/>(app.py)<br/>Query + PDF Upload"]
         RD["Results Display<br/>(app.py)<br/>Report + Download"]
     end
 
-    subgraph BL["BUSINESS LOGIC LAYER<br/>(CrewAI Engine)"]
+    subgraph BL["BUSINESS LOGIC LAYER (CrewAI Engine)"]
         AG["Senior Academic Research<br/>Analyst Agent<br/>(researcher.py)"]
         ET["EXA Answer<br/>Tool"]
         PT["PDF Analysis<br/>Tool"]
