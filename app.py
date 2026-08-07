@@ -1,141 +1,139 @@
+# Handle SQLite for ChromaDB
+try:
+    __import__('pysqlite3')
+    import sys
+    sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+except (ImportError, KeyError):
+    pass
+
 import streamlit as st
 import os
-import requests
+import tempfile
+from source.components.sidebar import render_sidebar
+from source.components.researcher import create_researcher, create_research_task, run_research
+from source.utils.output_handler import capture_output
 
 #--------------------------------#
-#      Ollama Integration        #
+#         Streamlit App          #
 #--------------------------------#
-def get_ollama_models():
-    """Get list of available Ollama models from local instance.
-    
-    Returns:
-        list: Names of available Ollama models, or empty list if Ollama is not running
-    """
-    try:
-        response = requests.get("http://localhost:11434/api/tags")
-        if response.status_code == 200:
-            models = response.json()
-            return [model["name"] for model in models["models"]]
-        return []
-    except:
-        return []
+# Configure the page
+st.set_page_config(
+    page_title="InSight Forge",
+    page_icon="Detective",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
-#--------------------------------#
-#      Sidebar Configuration     #
-#--------------------------------#
+# Logo
+st.logo(
+    "https://cdn.prod.website-files.com/66cf2bfc3ed15b02da0ca770/66d07240057721394308addd_Logo%20(1).svg",
+    link="https://www.crewai.com/",
+    size="large"
+)
 
-def render_sidebar():
-    """Render the sidebar and handle API key & model configuration.
+# Main layout
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    st.title("InSight Forge", anchor=False)
     
-    The sidebar allows users to:
-    1. Select an LLM provider (OpenAI, GROQ, or Ollama)
-    2. Choose or input a specific model
-    3. Enter necessary API keys
+# Render sidebar and get selection (provider and model)
+selection = render_sidebar()
+
+# Check if API keys are set based on provider
+if selection["provider"] == "OpenAI":
+    if not os.environ.get("OPENAI_API_KEY"):
+        st.warning("Please enter your OpenAI API key in the sidebar to get started")
+        st.stop()
+elif selection["provider"] == "GROQ":
+    if not os.environ.get("GROQ_API_KEY"):
+        st.warning("Please enter your GROQ API key in the sidebar to get started")
+        st.stop()
+
+# Check EXA key for non-Ollama providers
+if selection["provider"] != "Ollama":
+    if not os.environ.get("EXA_API_KEY"):
+        st.warning("Please enter your EXA API key in the sidebar to get started")
+        st.stop()
+        
+# Add Ollama check
+if selection["provider"] == "Ollama" and not selection["model"]:
+    st.warning("No Ollama models found. Please make sure Ollama is running and you have models loaded.")
+    st.stop()
     
-    Returns:
-        dict: Contains selected provider and model information
-    """
-    with st.sidebar:
-        st.markdown("### ⚙️ Configuration")
-        st.write("")
-        with st.expander("🤖 Model Selection", expanded=True):
-            provider = st.radio(
-                "Select LLM Provider",
-                ["OpenAI", "GROQ", "Ollama"],
-                help="Choose which Large Language Model provider to use",
-                horizontal=True
-            )
-            if provider == "OpenAI":
-                model_option = st.selectbox(
-                    "Select OpenAI Model",
-                    ["gpt-4o-mini", "gpt-4o", "o1", "o1-mini", "o1-preview", "o3-mini", "Custom"],
-                    index=0
-                )
-                if model_option == "Custom":
-                    model = st.text_input("Enter your custom OpenAI model:", value="", help="Specify your custom model string")
-                else:
-                    model = model_option
-            elif provider == "GROQ":
-                model = st.selectbox(
-                    "Select GROQ Model",
-                    [
-                        "qwen-2.5-32b",
-                        "deepseek-r1-distill-qwen-32b",
-                        "deepseek-r1-distill-llama-70b",
-                        "llama-3.3-70b-versatile",
-                        "llama-3.1-8b-instant",
-                        "Custom"
-                    ],
-                    index=0,
-                    help="Choose from GROQ's available models. All these models support tool use and parallel tool use."
-                )
-                if model == "Custom":
-                    model = st.text_input("Enter your custom GROQ model:", value="", help="Specify your custom model string")
-            elif provider == "Ollama":
-                # Get available Ollama models
-                ollama_models = get_ollama_models()
-                if not ollama_models:
-                    st.warning("⚠️ No Ollama models found. Make sure Ollama is running locally.")
-                    model = None
-                else:
-                    st.warning("⚠️ Note: Most Ollama models have limited function-calling capabilities. This may affect research quality as they might not effectively use web search tools.")
-                    model = st.selectbox(
-                        "Select Ollama Model",
-                        ollama_models,
-                        help="Choose from your locally available Ollama models. For best results, use models known to handle function calling well (e.g., mixtral, openhermes)."
-                    )
-        with st.expander("🔑 API Keys", expanded=True):
-            st.info("API keys are stored temporarily in memory and cleared when you close the browser.")
-            if provider == "OpenAI":
-                openai_api_key = st.text_input(
-                    "OpenAI API Key",
-                    type="password",
-                    placeholder="Enter your OpenAI API key",
-                    help="Enter your OpenAI API key"
-                )
-                if openai_api_key:
-                    os.environ["OPENAI_API_KEY"] = openai_api_key
-            elif provider == "GROQ":
-                groq_api_key = st.text_input(
-                    "GROQ API Key",
-                    type="password",
-                    placeholder="Enter your GROQ API key",
-                    help="Enter your GROQ API key"
-                )
-                if groq_api_key:
-                    os.environ["GROQ_API_KEY"] = groq_api_key
-                    
-            # Only show EXA key input if not using Ollama
-            if provider != "Ollama":
-                exa_api_key = st.text_input(
-                    "EXA API Key",
-                    type="password",
-                    placeholder="Enter your EXA API key",
-                    help="Enter your EXA API key for web search capabilities"
-                )
-                if exa_api_key:
-                    os.environ["EXA_API_KEY"] = exa_api_key
-        st.write("")
-        with st.expander("ℹ️ About", expanded=False):
-            st.markdown("""
-                This research assistant uses advanced AI models to help you:
-                - Research any topic in depth
-                - Analyze and summarize information
-                - Provide structured reports
-                
-                Choose your preferred model and enter the required API keys to get started.
-                
-                **Note on Model Selection:**
-                - OpenAI and GROQ models provide full functionality with web search capabilities
-                - Ollama models run locally but have limited function-calling abilities
-                  and will rely more on their base knowledge
-                
-                For Ollama users:
-                - Make sure Ollama is running locally with your desired models loaded
-                - Best results with models that handle function calling (e.g., mixtral, openhermes)
-                - Web search functionality is disabled for Ollama models
-            """)
-    return {
-        "provider": provider,
-        "model": model
-    }
+# Create two columns for the input section
+input_col1, input_col2, input_col3 = st.columns([1, 3, 1])
+with input_col2:
+    task_description = st.text_area(
+        "What would you like to research?",
+        value="Research the latest AI Agent news in February 2025 and summarize each.",
+        height=68
+    )
+
+    # === PDF UPLOAD - Added (only this part is new) ===
+    uploaded_pdfs = st.file_uploader(
+        "Upload Research Papers (PDF) - Optional",
+        type="pdf",
+        accept_multiple_files=True,
+        help="The agent will read and analyze these PDFs"
+    )
+
+col1, col2, col3 = st.columns([1, 0.5, 1])
+with col2:
+    start_research = st.button("Start Research", use_container_width=False, type="primary")
+
+if start_research:
+    with st.status("Researching...", expanded=True) as status:
+        try:
+            # Create persistent container for process output with fixed height.
+            process_container = st.container(height=300, border=True)
+            output_container = process_container.container()
+            
+            # Single output capture context.
+            with capture_output(output_container):
+                # Handle uploaded PDFs
+                full_task = task_description
+                if uploaded_pdfs:
+                    pdf_paths = []
+                    for uploaded_file in uploaded_pdfs:
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+                            tmp.write(uploaded_file.getbuffer())
+                            pdf_paths.append(tmp.name)
+                    full_task += f"\n\nAlso analyze these uploaded PDFs: {pdf_paths}"
+
+                researcher = create_researcher(selection)
+                task = create_research_task(researcher, full_task)
+                result = run_research(researcher, task)
+                status.update(label="Research completed!", state="complete", expanded=False)
+        
+        except Exception as e:
+            status.update(label="Error occurred", state="error")
+            st.error(f"An error occurred: {str(e)}")
+            st.stop()
+            
+    # Convert CrewOutput to string for display and download
+    result_text = str(result)
+    
+    # Display the final result
+    st.markdown(result_text)
+    
+    # Create download buttons
+    st.divider()
+    download_col1, download_col2, download_col3 = st.columns([1, 2, 1])
+    
+    with download_col2:
+        st.markdown("### Download Research Report")
+        
+        # Download as Markdown
+        st.download_button(
+            label="Download Report",
+            data=result_text,
+            file_name="research_report.md",
+            mime="text/markdown",
+            help="Download the research report in Markdown format"
+        )
+    
+# Add footer
+st.divider()
+footer_col1, footer_col2, footer_col3 = st.columns([1, 2, 1])
+with footer_col2:
+    st.caption("Made with using [CrewAI](https://crewai.com), [Exa](https://exa.ai) and [Streamlit](https://streamlit.io)") 
